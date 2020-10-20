@@ -9,7 +9,7 @@ from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 import os
 
-root_dir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\' 
+root_dir = '------------------' 
 modelname = '--------'
 
 test=pd.read_excel('----------------.xlsx',delimiter=',',encoding='latin-1')
