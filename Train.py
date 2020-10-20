@@ -20,7 +20,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-root_dir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\' 
+root_dir = '---------------------------------' 
 
 modelname = input("Type model name : ")
 filename = input("Type file name : ")
