@@ -15,12 +15,13 @@ from scipy import sparse
 import gzip, re, string
 import pickle
 import argparse
+import os
 
 import warnings
 warnings.filterwarnings('ignore')
 
 
-root_dir = '---------------------------------' 
+root_dir = os.getcwd()
 
 modelname = input("Type model name : ")
 filename = input("Type file name : ")
@@ -29,15 +30,15 @@ if not os.path.exists(root_dir + modelname):
 	os.makedirs(root_dir + modelname)
 
 # Reading the file 
-train = pd.read_excel(filename,delimiter=',',encoding='latin-1')
+train = pd.read_excel(filename)
 train['Description']=train['Ticket_Description'].astype('str')
 
+train['Level1'] =  train['Level1'].astype('str')
 train['Level2'] =  train['Level2'].astype('str')
-train['Level3'] =  train['Level3'].astype('str')
 
-train.dropna(subset = ['Level2', 'Level3'])
+train.dropna(subset = ['Level1', 'Level2'])
 
-train['Intent'] = train[['Level2','Level3']].agg('-'.join, axis=1).astype('category')
+train['Intent'] = train[['Level1','Level2']].agg('__'.join, axis=1).astype('category')
 train['Intent']= train['Intent'].astype('category')
 label_cols =  train['Intent'].cat.categories.tolist()
 
@@ -74,9 +75,9 @@ for name in label_cols:
 	x = vec.transform(train[COMMENT])
 	print('fit', name)
 	m,r = get_mdl(train[name])
-	model_loc = root_dir + modelname + '\\' + str(name).replace('/','or') + ".json.gz_model.pkl"
-	joblib.dump(m, model_loc)    
-	r_loc = root_dir + modelname + '\\' +  str(name).replace('/','or') + ".json.gz_r.npz"
+	model_loc = root_dir + '\\' + modelname + '\\' + str(name).replace('/','or') + ".json.gz_model.pkl"
+	pickle.dump(m, open(model_loc,'wb'))
+	r_loc = root_dir + '\\' + modelname + '\\' +  str(name).replace('/','or') + ".json.gz_r.npz"
 	sparse.save_npz(r_loc, r)
-	vec_loc = root_dir + modelname + '\\' + str(name).replace('/','or') + ".json.gz_vector.pkl"
-	joblib.dump(vec, vec_loc,protocol = pickle.HIGHEST_PROTOCOL)
+	vec_loc = root_dir + '\\' + modelname + '\\' + str(name).replace('/','or') + ".json.gz_vector.pkl"
+	pickle.dump(vec, open(vec_loc,'wb'))
