@@ -245,7 +245,7 @@ def get_keywords(text, eng_words = engwords):
 def col_keyword(pData, pTktDesc, column):
     try:
         pData['combined'] = pData[column].apply(lambda row: ' '.join(row))
-        pData[pTktDesc] = ([' '.join(set(a.split(' ')).difference(set(b.split(' ')))) for a, b in zip(pData[pTktDesc], pData['combined'])])
+        pData['Sample'] = ([' '.join(set(a.split(' ')).difference(set(b.split(' ')))) for a, b in zip(pData[pTktDesc], pData['combined'])])
         del pData['combined']
     except Exception as e:
         print('*** Error[001]: ocurred while combining column',e)
@@ -406,9 +406,10 @@ def normalize_corpus(corpus, html_stripping= True, contraction_expansion= True,
 # Functionality : Run the functions                                                          
 ###########################################################################################################################
 
-def preprocess(pData, pTktDesc, pCol):
+def preprocess(pData, pTktDesc):
     pData = pData.applymap(str)
-    pData = col_keyword(pData, pTktDesc, pCol)
+    # pData = col_keyword(pData, pTktDesc, pCol)
+    # pData = pData.dropna(subset = ['Sample'])  
     pData = pData.dropna(subset = [pTktDesc])  
   
     try:

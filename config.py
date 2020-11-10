@@ -12,3 +12,4 @@ pTestDir = os.path.join(pRootDir,'inputtestdata') # Testing file Directory
 Train = True # Boolean whether to run the script for training or not
 Test = True # Boolean whether to run scrip for testing of not 
 pTicketId = 'Ticket_No' # colum name for ticket column
+preprocessing = True

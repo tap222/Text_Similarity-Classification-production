@@ -5,6 +5,7 @@ from Cython.Build import cythonize
 ext_modules = [
 	Extension("train",  ["train.py"]),
 	Extension("test",  ["test.py"]),
+	Extension("utils",  ["utils.py"]),
 ]
 setup(
     name = 'Auto-Synthesis',

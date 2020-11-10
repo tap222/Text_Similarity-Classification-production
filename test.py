@@ -3,7 +3,6 @@ import numpy as np
 from scipy import sparse
 import os
 import pickle
-import config
 import glob
 import sys
 import traceback
@@ -52,7 +51,7 @@ def categories(pRootDir, pModelName):
 # # Author      : Tapas Mohanty                                                                                        
 # # Functionality : Find intent for the tickets which has low thershold value by using NB-SVM and Logistic Regression
 # ###########################################################################################################################
-def intentpred(pData, pDesc, pTh, pTicketId, pModelName, pRootDir):
+def intentpred(pData, pDesc, pTh, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
 
     try:
         pData[pDesc].fillna("unknown", inplace=True)  
@@ -74,10 +73,10 @@ def intentpred(pData, pDesc, pTh, pTicketId, pModelName, pRootDir):
         pintentdf['Intent']= np.where(pintentdf['Confidence_Level'] > float(pTh), pintentdf['Intent'] , 'Others') 
         pData.reset_index(drop=True, inplace=True)
         pintentdf.reset_index(drop=True, inplace=True)
-        pintentdf = pd.concat([pData[config.pTicketId], pintentdf],axis=1)   
-        pintentdf = pintentdf[[config.pTicketId, 'Confidence_Level', 'Intent']]
-        pData.loc[pData[config.pTicketId].isin(pintentdf[config.pTicketId]), ['Confidence_Level', 'Intent']] = pintentdf[['Confidence_Level', 'Intent']].values
-        pData[[config.pLevel1,config.pLevel2]] = pData.Intent.str.split("__",expand=True,)
+        pintentdf = pd.concat([pData[pTicketId], pintentdf],axis=1)   
+        pintentdf = pintentdf[[pTicketId, 'Confidence_Level', 'Intent']]
+        pData.loc[pData[pTicketId].isin(pintentdf[pTicketId]), ['Confidence_Level', 'Intent']] = pintentdf[['Confidence_Level', 'Intent']].values
+        pData[[pLevel1,pLevel2]] = pData.Intent.str.split("__",expand=True,)
  
     except Exception as e:
         print(e)
