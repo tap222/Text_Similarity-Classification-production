@@ -1,8 +1,8 @@
 import os
-pModelName = 'model\\'+'TestModel' #model Name 
+pAccountName = 'model\\'+'TMobile' #model Name 
 pTh = 0.3 # Thershold below intent is categorzied other
 pDesc = 'Ticket_Description' # Ticket Description column name for training and testing
-pRootDir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\AutoSynthesisTesting\\data' # Directory of the data file
+pRootDir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\AutoSynthesisLite\\data' # Directory of the data file
 pLevel1 = 'Level1' # Column name of Level1
 pLevel2 = 'Level2' # column name of Level2
 pTrainingFileName = 'TrainData' # name for training file
@@ -13,3 +13,11 @@ Train = True # Boolean whether to run the script for training or not
 Test = True # Boolean whether to run scrip for testing of not 
 pTicketId = 'Ticket_No' # colum name for ticket column
 preprocessing = True
+nTickets = 5
+# pModelName = 'logistic'
+# nNumFeatures = 4
+# nTopLabels = 3
+# tLabels = (0,1,2)
+Idx = [100,120,150,300] # Row no. to display for keyword weightage
+viz = True #Boolean whether to run the script of visualization
+nTopKeywrd = 10 #Top keywords to represent in weight calculation for an intent

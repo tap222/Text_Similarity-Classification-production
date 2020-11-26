@@ -6,6 +6,7 @@ ext_modules = [
 	Extension("train",  ["train.py"]),
 	Extension("test",  ["test.py"]),
 	Extension("utils",  ["utils.py"]),
+	Extension("preprocessing",  ["preprocessing.py"]),
 ]
 setup(
     name = 'Auto-Synthesis',

@@ -1,16 +1,15 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import pickle
+import os
+import sys
+import traceback
+import re, string
+from scipy import sparse
 import pandas as pd, numpy as np
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import  TfidfVectorizer
-from scipy import sparse
-import re, string
-import pickle
-import os
-import traceback
-import sys
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -79,13 +78,13 @@ def tokenize(s):
     re_tok = re.compile(f'([{string.punctuation}“”¨_«»®´·º½¾¿¡§£₤‘’])')
     return re_tok.sub(r' \1 ', s).split()  
     
-def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir):
+def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
     try:
         x,vec = vector_trans(pData, pDesc, pModelName, pRootDir)
         print('Number of Tickets for training :', len(pData)) 
-        pTrainData, __ = traindata(pData, pDesc, pLevel1, pLevel2)		
+        pTrainData, __ = traindata(pData, pDesc, pLevel1, pLevel2)      
         pTrainData['Intent']= pTrainData['Intent'].astype('category')
-        pLabel = [k for k in pTrainData['Intent'].value_counts().keys() if pTrainData['Intent'].value_counts()[k] > 5]
+        pLabel = [k for k in pTrainData['Intent'].value_counts().keys() if pTrainData['Intent'].value_counts()[k] > int(nTickets)]
         pTrainData = pd.concat([pTrainData,pd.get_dummies(pTrainData['Intent'])],axis=1)
         pTrainData.drop(['Intent'],axis=1, inplace=True)
         
