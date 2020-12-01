@@ -19,4 +19,4 @@ Idx = [100,120,150,300] # Row no. to display for keyword weightage
 viz = True #Boolean whether to run the script of visualization
 nTopKeywrd = 10 #Top keywords to represent in weight calculation for an intent
 pTrainingDataDir = os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]))
-pThSim = 0
+pThSim = 0.90

@@ -130,7 +130,8 @@ if __name__ == "__main__":
             pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir)
             pDesc = config.pDesc
             if len(pTrainingFiles) > 0:
-                __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
+                # __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
+                __, pTestingData = similarity.similaritypolymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
             else:
                 print('No Training File present to compare skipping similarity')
                 pass

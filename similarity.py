@@ -6,6 +6,14 @@ from scipy.sparse import csr_matrix
 import sparse_dot_topn.sparse_dot_topn as ct
 from sklearn.neighbors import NearestNeighbors
 from sklearn.feature_extraction.text import TfidfVectorizer
+from polyfuzz import PolyFuzz
+
+###########################################################################################################################
+# Author        : Tapas Mohanty  
+# Modified      : 
+# Reviewer      :
+# Functionality : calculate the sparse matrix for similarity calculation
+###########################################################################################################################
 
 def awesome_cossim_top(A, B, ntop, lower_bound=0):
     try:
@@ -41,6 +49,13 @@ def awesome_cossim_top(A, B, ntop, lower_bound=0):
 
     return csr_matrix((data,indices,indptr),shape=(M,N))
 
+###########################################################################################################################
+# Author        : Tapas Mohanty  
+# Modified      : 
+# Reviewer      :
+# Functionality : Transformation of train data i.e. clubbing level 1 and level2 into one column name intent.
+###########################################################################################################################
+
 def traindata(pData, pDesc, pLevel1, pLevel2):
     try:
         pData[pDesc]= pData[pDesc].astype('str')
@@ -55,10 +70,17 @@ def traindata(pData, pDesc, pLevel1, pLevel2):
         print(traceback.format_exc())
         return(-1)
     return pData, pLabel
-    
+ 
+###########################################################################################################################
+# Author        : Tapas Mohanty  
+# Modified      : 
+# Reviewer      :
+# Functionality : Finding the similarity between two text
+###########################################################################################################################
+ 
 def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
     try:
-        pMatches, pTestData['Intent'], pTestData['Confidence Level'] = [],'Nan','Nan'
+        pMatches, pTestData['Intent'], pTestData['Confidence_Level'] = [],'Nan','Nan'
         pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
         pTrainDataDesc = pd.DataFrame(pTrainData[pDesc])
         pTrainDataDescUnq = pTrainDataDesc[pDesc].unique()
@@ -72,13 +94,42 @@ def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
         for i,j in enumerate(indices):
           pTemp = [distances[i][0], pTrainDataDesc.values[j][0][0],pTestDataDescList[i]]
           pMatches.append(pTemp)
-        pMatchesDf = pd.DataFrame(pMatches, columns=['Confidence Level','Matched name','Original name'])
+        pMatchesDf = pd.DataFrame(pMatches, columns=['Confidence_Level','Matched name','Original name'])
         
         for i in range(len(pTestData)):
             pTestData['Intent'][i] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf['Matched name'][i], True , False)]['Intent'].values[0]
-            pTestData['Confidence Level'][i] = pMatchesDf['Confidence Level'][i]
+            pTestData['Confidence_Level'][i] = pMatchesDf['Confidence_Level'][i]
     except Exception as e:
         print('*** ERROR[003]: Error in similarity main function: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
         return(-1)
     return(0, pTestData)
+
+###########################################################################################################################
+# Author        : Tapas Mohanty  
+# Modified      : 
+# Reviewer      :
+# Functionality : Fiding the similarity between two text using polyfuzz
+# Comments      : https://github.com/MaartenGr/PolyFuzz
+###########################################################################################################################
+
+def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
+    try:
+        pTestData['Intent'], pTestData['Confidence_Level'] = 'Nan','Nan'
+        pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
+        pTrainDataDesc = pd.DataFrame(pTrainData[pDesc])
+        pTrainDataDescUnq = pTrainDataDesc[pDesc].unique().tolist()
+        pTestDataDescList = list(pTestData[pDesc].values) #need to convert back to a list
+        model = PolyFuzz("TF-IDF")
+        model.match(pTestDataDescList, pTrainDataDescUnq)
+        pMatchesDf = model.get_matches()
+
+        for i in range(len(pTestData)):
+            pTestData['Intent'][i] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf['To'][i], True , False)]['Intent'].values[0]
+            pTestData['Confidence_Level'][i] = pMatchesDf['Similarity'][i]
+            
+    except Exception as e:
+        print('*** ERROR[004]: Error in similarity poly main function: ', sys.exc_info()[0],str(e))
+        print(traceback.format_exc())
+        return(-1)
+    return(0, pTestData)    

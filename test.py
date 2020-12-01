@@ -56,8 +56,9 @@ def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelNam
     try:
         if 'Confidence_Level' not in pData:
             pData['Confidence_Level'] = float(pThSim + 1)   
-        pDataTh = pData[np.where(pData['Confidence_Level'] > float(pThSim), True, False)]
-        pData['Confidence_Level'] = float(100 - 0.01 * random.randint(0,100))
+        pDataTh = pData[np.where(pData['Confidence_Level'] < float(pThSim), True, False)]
+        # pData['Confidence_Level'] = float(100)
+        # pData['Confidence_Level'] = pData['Confidence_Level'].apply(lambda x : float(( x )- (0.01 * random.randint(0,100))))
         print('Length of file for Prediction after similarity:', pDataTh.shape[0])      
         if len(pDataTh) > 0:
             pDataTh[pDesc].fillna("unknown", inplace=True)     
@@ -77,7 +78,7 @@ def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelNam
             pintentdf['Confidence_Level'] = pintentdf[oCategoryNames].max(axis=1)
             pintentdf['Intent'] = pintentdf[oCategoryNames].idxmax(axis=1)
             pintentdf['Intent']= np.where(pintentdf['Confidence_Level'] > float(pTh), pintentdf['Intent'] , 'Others') 
-            pData.reset_index(drop=True, inplace=True)
+            pDataTh.reset_index(drop=True, inplace=True)
             pintentdf.reset_index(drop=True, inplace=True) 
             pintentdf = pd.concat([pDataTh['Ticket_No'], pintentdf],axis=1)  
             pintentdf = pintentdf[['Ticket_No','Confidence_Level','Intent']]
