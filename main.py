@@ -7,6 +7,7 @@ import config
 import tarfile
 import datetime
 import traceback
+import similarity
 import pandas as pd
 import preprocessing
 import visualization
@@ -38,13 +39,12 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
 # Functionality : Run the main file for testing
 ###########################################################################################################################
 
-def maintest(pData, pDesc, pTh, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
+def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
     if not set([pDesc, pTicketId]).issubset(pData.columns):
         print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pData.columns))
         return(-1, pData)
     try:
-        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pTicketId, pLevel1, pLevel2, pModelName, pRootDir)
-    
+        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir)
     except Exception as e:
         print('*** ERROR[004]: Error in Test main function: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
@@ -70,13 +70,12 @@ pTestFileName = config.pTestFileName
 pTrainDir = config.pTrainDir
 pTestDir = config.pTestDir
 nTickets = config.nTickets
-# nNumFeatures = config.nNumFeatures 
 Idx = config.Idx
-# nTopLabels = config.nTopLabels
-# tLabels = config.tLabels
-# pModelName = config.pModelName
 viz = config.viz
 nTopKeywrd = config.nTopKeywrd
+pTrainingDataDir = config.pTrainingDataDir
+pThSim = config.pThSim
+
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
 # Modified      : 
@@ -124,10 +123,22 @@ if __name__ == "__main__":
             pDesc = config.pDesc
             _, pTestingData = preprocessing.preprocess(pTestingData, pDesc)
             pDesc = 'Sample'
-            print('*************************Testing Preprocess Completed*********************************')        
+            print('*************************Testing Preprocess Completed*********************************')  
+
+        print('*************************Testing Similarity Started***************************************')
+        if config.sim:
+            pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir)
+            pDesc = config.pDesc
+            if len(pTrainingFiles) > 0:
+                __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
+            else:
+                print('No Training File present to compare skipping similarity')
+                pass
+        print('*************************Testing Similarity Completed*************************************')     
         
         print('*************************Testing Started***********************************************')
-        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir)
+        pDesc = 'Sample'
+        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir)
         if config.viz:
             visualization.eli5visual(pTestOutputData, pDesc, Idx, pAccountName, pVec, nTopKeywrd, pRootDir)      
         pTestOutputData.to_excel(os.path.join(pRootDir  + '\\' + 'output', pTestFileName + '__' + 'ouput' + '.xlsx'), index = False) 

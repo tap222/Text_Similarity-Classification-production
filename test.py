@@ -2,6 +2,7 @@ import os
 import sys
 import glob
 import pickle
+import random
 import traceback
 import numpy as np
 import pandas as pd
@@ -50,31 +51,42 @@ def categories(pRootDir, pModelName):
 # # Author      : Tapas Mohanty                                                                                        
 # # Functionality : Find intent for the tickets which has low thershold value by using NB-SVM and Logistic Regression
 # ###########################################################################################################################
-def intentpred(pData, pDesc, pTh, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
+def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
 
     try:
-        pData[pDesc].fillna("unknown", inplace=True)     
-        oCategoryNames = categories(pRootDir, pModelName)
-        pData[pTicketId] = pData[pTicketId].astype('category') 
-        preds = np.zeros((len(pData), len(oCategoryNames)))
-        
-        vec = loadTfidfFile(pRootDir, pModelName)
-        tkt_desc = vec.transform(pData[pDesc].astype(str))
-        
-        for index,name in enumerate(oCategoryNames):
-            print('Calculating prediction of intent', name)
-            estimator = loadmodel(pRootDir, pModelName, name)           
-            r = loadcsr_matrix(pRootDir, pModelName, name)
-            preds[:,index] = estimator.predict_proba(tkt_desc.multiply(r))[:,1]      
-        pintentdf = pd.DataFrame(preds, columns = oCategoryNames)
-        pintentdf['Confidence_Level'] = pintentdf[oCategoryNames].max(axis=1)
-        pintentdf['Intent'] = pintentdf[oCategoryNames].idxmax(axis=1)
-        pintentdf['Intent']= np.where(pintentdf['Confidence_Level'] > float(pTh), pintentdf['Intent'] , 'Others') 
-        pData.reset_index(drop=True, inplace=True)
-        pintentdf.reset_index(drop=True, inplace=True) 
-        pintentdf = pintentdf[['Confidence_Level', 'Intent']]
-        pData = pd.concat([pData, pintentdf],axis=1)   
-        pData[[pLevel1,pLevel2]] = pData.Intent.str.split("__",expand=True,)
+        if 'Confidence_Level' not in pData:
+            pData['Confidence_Level'] = float(pThSim + 1)   
+        pDataTh = pData[np.where(pData['Confidence_Level'] > float(pThSim), True, False)]
+        pData['Confidence_Level'] = float(100 - 0.01 * random.randint(0,100))
+        print('Length of file for Prediction after similarity:', pDataTh.shape[0])      
+        if len(pDataTh) > 0:
+            pDataTh[pDesc].fillna("unknown", inplace=True)     
+            oCategoryNames = categories(pRootDir, pModelName)
+            pDataTh[pTicketId] = pDataTh[pTicketId].astype('category') 
+            preds = np.zeros((len(pDataTh), len(oCategoryNames)))
+            
+            vec = loadTfidfFile(pRootDir, pModelName)
+            tkt_desc = vec.transform(pDataTh[pDesc].astype(str))
+            
+            for index,name in enumerate(oCategoryNames):
+                print('Calculating prediction of intent', name)
+                estimator = loadmodel(pRootDir, pModelName, name)           
+                r = loadcsr_matrix(pRootDir, pModelName, name)
+                preds[:,index] = estimator.predict_proba(tkt_desc.multiply(r))[:,1]      
+            pintentdf = pd.DataFrame(preds, columns = oCategoryNames)
+            pintentdf['Confidence_Level'] = pintentdf[oCategoryNames].max(axis=1)
+            pintentdf['Intent'] = pintentdf[oCategoryNames].idxmax(axis=1)
+            pintentdf['Intent']= np.where(pintentdf['Confidence_Level'] > float(pTh), pintentdf['Intent'] , 'Others') 
+            pData.reset_index(drop=True, inplace=True)
+            pintentdf.reset_index(drop=True, inplace=True) 
+            pintentdf = pd.concat([pDataTh['Ticket_No'], pintentdf],axis=1)  
+            pintentdf = pintentdf[['Ticket_No','Confidence_Level','Intent']]
+            pData.loc[pData['Ticket_No'].isin(pintentdf['Ticket_No']), ['Confidence_Level', 'Intent']] = pintentdf[['Confidence_Level', 'Intent']].values
+            pData[['Level1','Level2']] = pData.Intent.str.split("__",expand=True,)
+        else:
+            pData['Confidence_Level'] = pData['Confidence_Level'].astype('float')
+            
+        pData[['Level1', 'Level2']] = pData.Intent.str.split("__",expand=True,)       
  
     except Exception as e:
         print(e)

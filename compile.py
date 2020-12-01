@@ -7,6 +7,7 @@ ext_modules = [
 	Extension("test",  ["test.py"]),
 	Extension("utils",  ["utils.py"]),
 	Extension("preprocessing",  ["preprocessing.py"]),
+	Extension("visualization",  ["visualization.py"]),
 ]
 setup(
     name = 'Auto-Synthesis',
