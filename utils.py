@@ -76,3 +76,16 @@ def setupFile(pRootdir, pDataFolder):
         print("*** ERROR[004]: %s : %s" % (pDataFolder , e.strerror))
         return(-1)          
     return(0)
+    
+def movefile(pFromDir, pToDir):
+    try:
+        for root, dirs, files in os.walk(pFromDir):
+            for file in files:
+                shutil.move(root + '//' + file, pToDir)
+
+    except OSError as e:
+        raise(e)
+        print(traceback.format_exc())
+        print("*** ERROR[004]: %s : %s" % (pDataFolder , e.strerror))
+        return(-1)          
+    return(0)

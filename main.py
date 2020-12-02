@@ -22,11 +22,12 @@ warnings.filterwarnings("ignore")
 # Functionality : Run the main file for training
 ###########################################################################################################################
 
-def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFailedDir):
+def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir):
     if not set([pDesc, pLevel1, pLevel2]).issubset(pData.columns):
-        print('*** ERROR[001]: Loading XLS - Could be due to using non-standard template ***', str(pData.columns))
-        return(-1, pData)
+        utils.movefile(pTrainDir, pFailedDir)
         __, pFailedData = utils.Filelist(pFailedDir)
+        print('*** ERROR[001]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
+        return(-1, pData)
     try:
        pData = pData.dropna(subset=[pDesc, pLevel1, pLevel2], how='any')
        train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets)
@@ -44,11 +45,12 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pF
 # Functionality : Run the main file for testing
 ###########################################################################################################################
 
-def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pFailedDir):
+def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTestDir, pFailedDir):
     if not set([pDesc, pTicketId]).issubset(pData.columns):
-        print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pData.columns))
-        return(-1, pData)
+        utils.movefile(pTrainDir, pFailedDir)
         __, pFailedData = utils.Filelist(pFailedDir)
+        print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
+        return(-1, pData)
     try:
         pData = pData.dropna(subset=[pDesc, pTicketId], how='any')
         _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir)
@@ -111,7 +113,7 @@ if __name__ == "__main__":
             print('*************************Training Preprocess Completed*********************************')
 
         print('*************************Training Started***********************************************')
-        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets, pFailedDir)  
+        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets, pTrainDir, pFailedDir)  
         print('*************************Training Completed*********************************************')
     
     if config.Test:
@@ -147,7 +149,7 @@ if __name__ == "__main__":
         
         print('*************************Testing Started***********************************************')
         pDesc = 'Sample'
-        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir, pFailedDir)
+        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir, pTestDir, pFailedDir)
         print('*************************Testing Completed*********************************************')
         print('*************************Visualization Started*********************************************')
         if config.viz:
