@@ -2,7 +2,7 @@ import os
 pAccountName = 'model\\'+'Golder' #model Name 
 pTh = 0.3 # Thershold below intent is categorzied other
 pDesc = 'Ticket_Description' # Ticket Description column name for training and testing
-pRootDir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\AutoSynthesisLite\\data' # Directory of the data file
+pRootDir = 'C:\\Users\\tamohant\\Desktop\\data' # Directory of the data file
 pLevel1 = 'Level1' # Column name of Level1
 pLevel2 = 'Level2' # column name of Level2
 pTrainingFileName = str(pAccountName[6:]) + 'TrainData' # name for training file
