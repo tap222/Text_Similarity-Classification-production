@@ -30,7 +30,7 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pT
         return(-1, pData)
     try:
        pData = pData.dropna(subset=[pDesc, pLevel1, pLevel2], how='any')
-       train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets)
+       train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir)
     
     except Exception as e:
         print('*** ERROR[002]: Error in Train main function: ', sys.exc_info()[0],str(e))
@@ -53,7 +53,8 @@ def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName,
         return(-1, pData)
     try:
         pData = pData.dropna(subset=[pDesc, pTicketId], how='any')
-        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir)
+        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTrainDir, pFailedDir)
+        
     except Exception as e:
         print('*** ERROR[004]: Error in Test main function: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())

@@ -1,4 +1,5 @@
 import sys
+import utils
 import traceback
 import numpy as np
 import pandas as pd
@@ -15,7 +16,7 @@ from polyfuzz import PolyFuzz
 # Functionality : calculate the sparse matrix for similarity calculation
 ###########################################################################################################################
 
-def awesome_cossim_top(A, B, ntop, lower_bound=0):
+def awesome_cossim_top(A, B, ntop, lower_bound=0, pFromDir, pToDir):
     try:
         # force A and B as a CSR matrix.
         # If they have already been CSR, there is no overhead
@@ -45,6 +46,7 @@ def awesome_cossim_top(A, B, ntop, lower_bound=0):
     except Exception as e:
         print('*** ERROR[001]: Error in similarity calculating matrix: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1)
 
     return csr_matrix((data,indices,indptr),shape=(M,N))
@@ -56,7 +58,7 @@ def awesome_cossim_top(A, B, ntop, lower_bound=0):
 # Functionality : Transformation of train data i.e. clubbing level 1 and level2 into one column name intent.
 ###########################################################################################################################
 
-def traindata(pData, pDesc, pLevel1, pLevel2):
+def traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir):
     try:
         pData[pDesc]= pData[pDesc].astype('str')
         pData[pLevel1] =  pData[pLevel1].astype('str')
@@ -68,6 +70,7 @@ def traindata(pData, pDesc, pLevel1, pLevel2):
     except Exception as e:
         print('*** ERROR[002]: Error in similarity transform train data: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1)
     return pData, pLabel
  
@@ -78,7 +81,7 @@ def traindata(pData, pDesc, pLevel1, pLevel2):
 # Functionality : Finding the similarity between two text
 ###########################################################################################################################
  
-def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
+def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir, pToDir):
     try:
         pMatches, pTestData['Intent'], pTestData['Confidence_Level'] = [],'Nan','Nan'
         pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
@@ -102,6 +105,7 @@ def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
     except Exception as e:
         print('*** ERROR[003]: Error in similarity main function: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1)
     return(0, pTestData)
 
@@ -113,12 +117,12 @@ def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
 # Comments      : https://github.com/MaartenGr/PolyFuzz
 ###########################################################################################################################
 
-def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
+def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir, pToDir):
     try:
         pTrainData = pTrainData[pTrainData[pDesc].notna()]
         pTestData = pTestData[pTestData[pDesc].notna()]
         pTestData['Intent'], pTestData['Confidence_Level'] = 'Nan','Nan'
-        pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
+        pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2, pFromDir, pToDir)
         pTrainDataDesc = pd.DataFrame(pTrainData[pDesc])
         pTrainDataDescUnq = pTrainDataDesc[pDesc].unique().tolist()
         pTestDataDescList = list(pTestData[pDesc].values) #need to convert back to a list
@@ -133,5 +137,6 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
     except Exception as e:
         print('*** ERROR[004]: Error in similarity poly main function: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1)
     return(0, pTestData)    

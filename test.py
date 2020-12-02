@@ -1,6 +1,7 @@
 import os
 import sys
 import glob
+import utils
 import pickle
 import random
 import traceback
@@ -51,7 +52,7 @@ def categories(pRootDir, pModelName):
 # # Author      : Tapas Mohanty                                                                                        
 # # Functionality : Find intent for the tickets which has low thershold value by using NB-SVM and Logistic Regression
 # ###########################################################################################################################
-def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
+def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pFromDir, pToDir):
 
     try:
         if 'Confidence_Level' not in pData:
@@ -93,5 +94,6 @@ def intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelNam
         print(e)
         print('*** ERROR[001]: intentpred ***', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1, pData) 
     return(0, pData, oCategoryNames, vec)

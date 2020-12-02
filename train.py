@@ -4,6 +4,7 @@ from __future__ import print_function
 import pickle
 import os
 import sys
+import utils
 import traceback
 import re, string
 from scipy import sparse
@@ -14,7 +15,7 @@ from sklearn.feature_extraction.text import  TfidfVectorizer
 import warnings
 warnings.filterwarnings('ignore')
 
-def traindata(pData, pDesc, pLevel1, pLevel2):
+def traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir):
     try:
         pData[pDesc]= pData[pDesc].astype('str')
         pData[pLevel1] =  pData[pLevel1].astype('str')
@@ -26,6 +27,7 @@ def traindata(pData, pDesc, pLevel1, pLevel2):
     except Exception as e:
         print('*** ERROR[001]: Error in Training: ', sys.exc_info()[0],str(e))
         print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
         return(-1)
     return pData, pLabel
 
@@ -46,7 +48,7 @@ def get_mdl(x, y):
     x_nb = x.multiply(r)
     return m.fit(x_nb, y), r
 
-def vector_trans(pData, pDesc, pModelName, pRootDir):
+def vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir):
     try:
         pData[pDesc].fillna("unknown", inplace=True)
         print('Started vector for Sample ')
@@ -71,6 +73,7 @@ def vector_trans(pData, pDesc, pModelName, pRootDir):
         raise(e)
         print(traceback.format_exc())
         print("*** ERROR[002]: %s " % (e.strerror))
+        utils.movefile(pFromDir, pToDir)
         return(-1)      
     return x,vec
     
@@ -78,11 +81,11 @@ def tokenize(s):
     re_tok = re.compile(f'([{string.punctuation}“”¨_«»®´·º½¾¿¡§£₤‘’])')
     return re_tok.sub(r' \1 ', s).split()  
     
-def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
+def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFromDir, pToDir):
     try:
-        x,vec = vector_trans(pData, pDesc, pModelName, pRootDir)
+        x,vec = vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir)
         print('Number of Tickets for training :', len(pData)) 
-        pTrainData, __ = traindata(pData, pDesc, pLevel1, pLevel2)      
+        pTrainData, __ = traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir)      
         pTrainData['Intent']= pTrainData['Intent'].astype('category')
         pLabel = [k for k in pTrainData['Intent'].value_counts().keys() if pTrainData['Intent'].value_counts()[k] > int(nTickets)]
         pTrainData = pd.concat([pTrainData,pd.get_dummies(pTrainData['Intent'])],axis=1)
@@ -106,5 +109,6 @@ def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
         raise(e)
         print(traceback.format_exc())
         print("*** ERROR[003] : %s" % (e.strerror))
+        utils.movefile(pFromDir, pToDir)
         return(-1)  
     return(0)   
