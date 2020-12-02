@@ -21,3 +21,4 @@ viz = False #Boolean whether to run the script of visualization
 nTopKeywrd = 10 #Top keywords to represent in weight calculation for an intent
 pTrainingDataDir = os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]))
 pThSim = 0.80
+pSheetName = None

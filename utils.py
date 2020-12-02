@@ -13,7 +13,7 @@ import shutil
 # Functionality : Collate multiple file into one
 ###########################################################################################################################
 
-def Filelist(pDir):
+def Filelist(pDir, pSheetName):
     try: 
         pData = pd.DataFrame() 
         pFiles, pAppendData = [],[]
@@ -22,7 +22,10 @@ def Filelist(pDir):
             
         if len(pFiles) > 0:       
             for file in os.listdir(os.path.join(pDir)):
-                pDataFile = pd.read_excel(os.path.join(pDir, file))
+                if pSheetName != None:
+                    pDataFile = pd.read_excel(os.path.join(pDir, file), sheet_name = str(pSheetName))
+                else:
+                    pDataFile = pd.read_excel(os.path.join(pDir, file))
                 pAppendData.append(pDataFile)   
             pData = pd.concat(pAppendData)
         

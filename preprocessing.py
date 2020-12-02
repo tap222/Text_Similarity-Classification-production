@@ -14,17 +14,21 @@
 # Import required Module / Packages
 # -------------------------------------------------------------------------------------------------------------------------
 
-import nltk
+
 import re
-from bs4 import BeautifulSoup
+import nltk
+import utils
+import traceback
 import unicodedata
-from contractions import CONTRACTION_MAP
-from nltk.corpus import wordnet
-from nltk.tokenize.toktok import ToktokTokenizer
 import en_core_web_sm
+from bs4 import BeautifulSoup
+from nltk.corpus import wordnet
+from contractions import CONTRACTION_MAP
+from nltk.tokenize.toktok import ToktokTokenizer
+
 from nltk.corpus import words
 engwords = words.words()
-import traceback
+
 
 ###########################################################################################################################
 # Author        : Tapas  Mohanty  
@@ -406,13 +410,12 @@ def normalize_corpus(corpus, html_stripping= True, contraction_expansion= True,
 # Functionality : Run the functions                                                          
 ###########################################################################################################################
 
-def preprocess(pData, pTktDesc):
-    pData = pData.applymap(str)
-    # pData = col_keyword(pData, pTktDesc, pCol)
-    # pData = pData.dropna(subset = ['Sample'])  
-    pData = pData.dropna(subset = [pTktDesc])  
-  
+def preprocess(pData, pTktDesc, pFromDir, pToDir):  
     try:
+        pData = pData.applymap(str)
+        # pData = col_keyword(pData, pTktDesc, pCol)
+        # pData = pData.dropna(subset = ['Sample'])  
+        pData = pData.dropna(subset = [pTktDesc])  
         norm_corpus = normalize_corpus(corpus=pData[pTktDesc], html_stripping=True, contraction_expansion=True, 
                                       accented_char_removal=True, text_lower_case=True, text_lemmatization=True, 
                                       text_stemming=False, special_char_removal=True, remove_digits=True,
@@ -420,6 +423,7 @@ def preprocess(pData, pTktDesc):
                                       eng_words = engwords)
     except Exception as e:
         raise(e)
+        utils.movefile(pFromDir, pToDir)
         print(traceback.format_exc())
         print('Error ocurred due to template',e)
         return(-1)                            

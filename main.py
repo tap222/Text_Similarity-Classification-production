@@ -22,10 +22,10 @@ warnings.filterwarnings("ignore")
 # Functionality : Run the main file for training
 ###########################################################################################################################
 
-def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir):
+def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir, pSheetName):
     if not set([pDesc, pLevel1, pLevel2]).issubset(pData.columns):
         utils.movefile(pTrainDir, pFailedDir)
-        __, pFailedData = utils.Filelist(pFailedDir)
+        __, pFailedData = utils.Filelist(pFailedDir, pSheetName)
         print('*** ERROR[001]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
         return(-1, pData)
     try:
@@ -45,10 +45,10 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pT
 # Functionality : Run the main file for testing
 ###########################################################################################################################
 
-def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTestDir, pFailedDir):
+def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTestDir, pFailedDir, pSheetName):
     if not set([pDesc, pTicketId]).issubset(pData.columns):
         utils.movefile(pTrainDir, pFailedDir)
-        __, pFailedData = utils.Filelist(pFailedDir)
+        __, pFailedData = utils.Filelist(pFailedDir, pSheetName)
         print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
         return(-1, pData)
     try:
@@ -85,6 +85,7 @@ nTopKeywrd = config.nTopKeywrd
 pTrainingDataDir = config.pTrainingDataDir
 pThSim = config.pThSim
 pFailedDir = config.pFailedDir
+pSheetName = config.pSheetName
 
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
@@ -95,7 +96,7 @@ pFailedDir = config.pFailedDir
 
 if __name__ == "__main__":
     if config.Train:
-        pTrainingFiles, pData = utils.Filelist(pTrainDir)
+        pTrainingFiles, pData = utils.Filelist(pTrainDir, pSheetName)
         if len(pTrainingFiles) > 0: 
             pTrainingData = pData
             utils.setupFile(pRootDir, pAccountName) 
@@ -108,16 +109,16 @@ if __name__ == "__main__":
         if config.preprocessing:
             print('*************************Training Preprocess Started***********************************')
             # _, pTrainingPreprocesData = preprocess(pTrainingData, pTktDesc, pCol)
-            _, pTrainingData = preprocessing.preprocess(pTrainingData, pDesc)
+            _, pTrainingData = preprocessing.preprocess(pTrainingData, pDesc, pTrainDir, pFailedDir)
             pDesc = 'Sample'
             print('*************************Training Preprocess Completed*********************************')
 
         print('*************************Training Started***********************************************')
-        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets, pTrainDir, pFailedDir)  
+        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets, pTrainDir, pFailedDir, pSheetName)  
         print('*************************Training Completed*********************************************')
     
     if config.Test:
-        pTestFiles, pData = utils.Filelist(pTestDir)
+        pTestFiles, pData = utils.Filelist(pTestDir, pSheetName)
         if len(pTestFiles) > 0: 
             pTestingData = pData
             if not os.path.exists(pRootDir +  '\\' + 'testdata' +  '\\' + str(pAccountName[6:]) ):
@@ -131,13 +132,13 @@ if __name__ == "__main__":
             print('*************************Testing Preprocess Started***********************************')     
             # _, pTestingPreprocesData = preprocess(pTestingData, pDesc, pCol)
             pDesc = config.pDesc
-            _, pTestingData = preprocessing.preprocess(pTestingData, pDesc)
+            _, pTestingData = preprocessing.preprocess(pTestingData, pDesc, pTestDir, pFailedDir)
             pDesc = 'Sample'
             print('*************************Testing Preprocess Completed*********************************')  
 
         print('*************************Testing Similarity Started***************************************')
         if config.sim:
-            pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir)
+            pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir, pSheetName)
             pDesc = config.pDesc
             if len(pTrainingFiles) > 0:
                 # __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
@@ -149,7 +150,7 @@ if __name__ == "__main__":
         
         print('*************************Testing Started***********************************************')
         pDesc = 'Sample'
-        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir, pTestDir, pFailedDir)
+        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir, pTestDir, pFailedDir, pSheetName)
         print('*************************Testing Completed*********************************************')
         print('*************************Visualization Started*********************************************')
         if config.viz:
