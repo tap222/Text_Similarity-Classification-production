@@ -2095,3 +2095,5 @@ report
 contact
 resolve
 work
+oracle
+fw

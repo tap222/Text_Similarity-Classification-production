@@ -67,9 +67,6 @@ def eli5visual(pData, pDesc, Idx, pAccountName, pVec, nTopKeywrd, pRootDir):
                 pExplanation = pTe.explain_prediction()
                 pHtml = format_as_html(pExplanation, force_weights=False, include_styles=False, horizontal_layout=True, show_feature_values=False)
                 savehtml(pRootDir, pHtml, Idx[i], pIntent)
-                # peli5Explanation = eli5.explain_prediction(pModels, pData[pDesc][int(Idx[i])], top = int(nTopKeywrd), vec = pVec, target_names = pIntent)
-                # peli5Html = format_as_html(peli5Explanation)
-                # savehtml(pRootDir, peli5Html, Idx[i], pIntent)
             else:
                 print("Please select valid Id")
 

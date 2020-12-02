@@ -115,6 +115,8 @@ def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
 
 def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
     try:
+        pTrainData = pTrainData[pTrainData[pDesc].notna()]
+        pTestData = pTestData[pTestData[pDesc].notna()]
         pTestData['Intent'], pTestData['Confidence_Level'] = 'Nan','Nan'
         pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
         pTrainDataDesc = pd.DataFrame(pTrainData[pDesc])
@@ -123,9 +125,9 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc):
         model = PolyFuzz("TF-IDF")
         model.match(pTestDataDescList, pTrainDataDescUnq)
         pMatchesDf = model.get_matches()
-
         for i in range(len(pTestData)):
-            pTestData['Intent'][i] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf['To'][i], True , False)]['Intent'].values[0]
+            if pMatchesDf['To'][i] != None:
+                pTestData['Intent'][i] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf['To'][i], True , False)]['Intent'].values[0]
             pTestData['Confidence_Level'][i] = pMatchesDf['Similarity'][i]
             
     except Exception as e:

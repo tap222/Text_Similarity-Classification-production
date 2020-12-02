@@ -12,6 +12,9 @@ import pandas as pd
 import preprocessing
 import visualization
 
+import warnings
+warnings.filterwarnings("ignore")
+
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
 # Modified      : 
@@ -19,11 +22,13 @@ import visualization
 # Functionality : Run the main file for training
 ###########################################################################################################################
 
-def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
+def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFailedDir):
     if not set([pDesc, pLevel1, pLevel2]).issubset(pData.columns):
         print('*** ERROR[001]: Loading XLS - Could be due to using non-standard template ***', str(pData.columns))
         return(-1, pData)
+        __, pFailedData = utils.Filelist(pFailedDir)
     try:
+       pData = pData.dropna(subset=[pDesc, pLevel1, pLevel2], how='any')
        train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets)
     
     except Exception as e:
@@ -39,11 +44,13 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets):
 # Functionality : Run the main file for testing
 ###########################################################################################################################
 
-def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir):
+def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pFailedDir):
     if not set([pDesc, pTicketId]).issubset(pData.columns):
         print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pData.columns))
         return(-1, pData)
+        __, pFailedData = utils.Filelist(pFailedDir)
     try:
+        pData = pData.dropna(subset=[pDesc, pTicketId], how='any')
         _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir)
     except Exception as e:
         print('*** ERROR[004]: Error in Test main function: ', sys.exc_info()[0],str(e))
@@ -75,6 +82,7 @@ viz = config.viz
 nTopKeywrd = config.nTopKeywrd
 pTrainingDataDir = config.pTrainingDataDir
 pThSim = config.pThSim
+pFailedDir = config.pFailedDir
 
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
@@ -103,7 +111,7 @@ if __name__ == "__main__":
             print('*************************Training Preprocess Completed*********************************')
 
         print('*************************Training Started***********************************************')
-        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets)  
+        maintrain(pTrainingData, pDesc, pLevel1, pLevel2, pAccountName, pRootDir, nTickets, pFailedDir)  
         print('*************************Training Completed*********************************************')
     
     if config.Test:
@@ -139,8 +147,12 @@ if __name__ == "__main__":
         
         print('*************************Testing Started***********************************************')
         pDesc = 'Sample'
-        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir)
-        if config.viz:
-            visualization.eli5visual(pTestOutputData, pDesc, Idx, pAccountName, pVec, nTopKeywrd, pRootDir)      
-        pTestOutputData.to_excel(os.path.join(pRootDir  + '\\' + 'output', pTestFileName + '__' + 'ouput' + '.xlsx'), index = False) 
+        _, pTestOutputData, pClassNames, pVec = maintest(pTestingData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pAccountName, pRootDir, pFailedDir)
         print('*************************Testing Completed*********************************************')
+        print('*************************Visualization Started*********************************************')
+        if config.viz:
+            visualization.eli5visual(pTestOutputData, pDesc, Idx, pAccountName, pVec, nTopKeywrd, pRootDir)
+        if not os.path.exists(pRootDir +  '\\' + 'output' +  '\\' + str(pAccountName[6:])):
+            os.makedirs(pRootDir + '\\' + 'output' + '\\' + str(pAccountName[6:]))           
+        pTestOutputData.to_excel(os.path.join(pRootDir  + '\\' + 'output' + '\\' + str(pAccountName[6:]), pTestFileName + '__' + str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")) + '__' + 'output' + '.xlsx'), index = False) 
+        print('*************************Visualization Completed*********************************************')
