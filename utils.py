@@ -29,9 +29,9 @@ def Filelist(pDir, pSheetName):
                 pAppendData.append(pDataFile)   
             pData = pd.concat(pAppendData)
         
-        # for root, dirs, files in os.walk(pDir):
-            # for file in files:
-                # os.remove(os.path.join(root, file))
+        for root, dirs, files in os.walk(pDir):
+            for file in files:
+                os.remove(os.path.join(root, file))
             
     except Exception as e:
         print(traceback.format_exc())

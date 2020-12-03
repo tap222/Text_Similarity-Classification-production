@@ -1,6 +1,6 @@
 import os
-pAccountName = 'model\\'+'Golder' #model Name 
-pTh = 0.3 # Thershold below intent is categorzied other
+pAccountName = 'model\\'+'Honeywell' #model Name 
+pTh = 0.0 # Thershold below intent is categorzied other
 pDesc = 'Ticket_Description' # Ticket Description column name for training and testing
 pRootDir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\AutoSynthesisLite\\data' # Directory of the data file
 pLevel1 = 'Level1' # Column name of Level1
@@ -11,8 +11,8 @@ pTrainDir = os.path.join(pRootDir,'inputtraindata') # Training file directory
 pTestDir = os.path.join(pRootDir,'inputtestdata') # Testing file Directory
 pFailedDir = os.path.join(pRootDir,'faileddata')
 Train = True # Boolean whether to run the script for training or not
-Test = False # Boolean whether to run scrip for testing of not 
-sim = False # Boolean whether to run scrip for Similarity or not
+Test = True # Boolean whether to run scrip for testing of not 
+sim = True # Boolean whether to run scrip for Similarity or not
 pTicketId = 'Ticket_No' # colum name for ticket column
 preprocessing = True
 nTickets = 3
@@ -20,5 +20,5 @@ Idx = [100,120,150,300] # Row no. to display for keyword weightage
 viz = False #Boolean whether to run the script of visualization
 nTopKeywrd = 10 #Top keywords to represent in weight calculation for an intent
 pTrainingDataDir = os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]))
-pThSim = 0.80
+pThSim = 0.60
 pSheetName = None

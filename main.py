@@ -22,15 +22,16 @@ warnings.filterwarnings("ignore")
 # Functionality : Run the main file for training
 ###########################################################################################################################
 
-def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir, pSheetName):
+def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFromDir, pToDir, pSheetName):
     if not set([pDesc, pLevel1, pLevel2]).issubset(pData.columns):
-        utils.movefile(pTrainDir, pFailedDir)
-        __, pFailedData = utils.Filelist(pFailedDir, pSheetName)
+        utils.movefile(pFromDir, pToDir)
+        __, pFailedData = utils.Filelist(pToDir, pSheetName)
         print('*** ERROR[001]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
         return(-1, pData)
+        sys.exit(-1)
     try:
        pData = pData.dropna(subset=[pDesc, pLevel1, pLevel2], how='any')
-       train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pFailedDir)
+       train.createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pTrainDir, pToDir)
     
     except Exception as e:
         print('*** ERROR[002]: Error in Train main function: ', sys.exc_info()[0],str(e))
@@ -45,15 +46,16 @@ def maintrain(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pT
 # Functionality : Run the main file for testing
 ###########################################################################################################################
 
-def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTestDir, pFailedDir, pSheetName):
+def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pFromDir, pToDir, pSheetName):
     if not set([pDesc, pTicketId]).issubset(pData.columns):
-        utils.movefile(pTrainDir, pFailedDir)
-        __, pFailedData = utils.Filelist(pFailedDir, pSheetName)
+        utils.movefile(pFromDir, pToDir)
+        __, pFailedData = utils.Filelist(pToDir, pSheetName)
         print('*** ERROR[003]: Loading XLS - Could be due to using non-standard template ***', str(pFailedData.columns))
         return(-1, pData)
+        sys.exit(-1)
     try:
         pData = pData.dropna(subset=[pDesc, pTicketId], how='any')
-        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pTrainDir, pFailedDir)
+        _, TestOutputData, pClassNames, pVec = test.intentpred(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName, pRootDir, pFromDir, pToDir)
         
     except Exception as e:
         print('*** ERROR[004]: Error in Test main function: ', sys.exc_info()[0],str(e))
@@ -68,25 +70,25 @@ def maintest(pData, pDesc, pTh, pThSim, pTicketId, pLevel1, pLevel2, pModelName,
 # Functionality : Variables declared used in the script
 ###########################################################################################################################
 
-pRootDir = config.pRootDir
-pAccountName = config.pAccountName
-pTrainingFileName = config.pTrainingFileName
-pDesc = config.pDesc
-pLevel1 = config.pLevel1
-pLevel2 = config.pLevel2
 pTh = config.pTh
-pTicketId = config.pTicketId
-pTestFileName = config.pTestFileName
-pTrainDir = config.pTrainDir
-pTestDir = config.pTestDir
-nTickets = config.nTickets
 Idx = config.Idx
 viz = config.viz
-nTopKeywrd = config.nTopKeywrd
-pTrainingDataDir = config.pTrainingDataDir
+pDesc = config.pDesc
 pThSim = config.pThSim
-pFailedDir = config.pFailedDir
+pLevel1 = config.pLevel1
+pLevel2 = config.pLevel2
+pTestDir = config.pTestDir
+nTickets = config.nTickets
+pRootDir = config.pRootDir
+pTicketId = config.pTicketId
+pTrainDir = config.pTrainDir
 pSheetName = config.pSheetName
+nTopKeywrd = config.nTopKeywrd
+pFailedDir = config.pFailedDir
+pAccountName = config.pAccountName
+pTestFileName = config.pTestFileName
+pTrainingDataDir = config.pTrainingDataDir
+pTrainingFileName = config.pTrainingFileName
 
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
@@ -103,7 +105,7 @@ if __name__ == "__main__":
             utils.setupFile(pRootDir, pAccountName) 
             if not os.path.exists(pRootDir +  '\\' + 'traindata' +  '\\' + str(pAccountName[6:]) ):
                 os.makedirs(pRootDir + '\\' + 'traindata' + '\\' + str(pAccountName[6:]))
-            pTrainingData.to_excel(os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]), pTrainingFileName + '.xlsx'), index = False)      
+            pTrainingData.to_excel(os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]), pTrainingFileName + '__' + str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")) + '.xlsx'), index = False)      
         else:
             print('No files in the directory')
             sys.exit(-1)
@@ -124,7 +126,7 @@ if __name__ == "__main__":
             pTestingData = pData
             if not os.path.exists(pRootDir +  '\\' + 'testdata' +  '\\' + str(pAccountName[6:]) ):
                 os.makedirs(pRootDir + '\\' + 'testdata' + '\\' + str(pAccountName[6:]) )
-            pTestingData.to_excel(os.path.join(pRootDir  + '\\' + 'testdata' + '\\' + str(pAccountName[6:]), pTestFileName + '.xlsx'), index = False)         
+            pTestingData.to_excel(os.path.join(pRootDir  + '\\' + 'testdata' + '\\' + str(pAccountName[6:]), pTestFileName + '__' + str(datetime.datetime.now().strftime("%Y%m%d-%H%M%S")) + '.xlsx'), index = False)         
         else:
             print('No files in the directory')
             sys.exit(-1)
@@ -143,7 +145,7 @@ if __name__ == "__main__":
             pDesc = config.pDesc
             if len(pTrainingFiles) > 0:
                 # __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
-                __, pTestingData = similarity.similaritypolymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
+                __, pTestingData = similarity.similaritypolymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc, pTestDir, pFailedDir)  
             else:
                 print('No Training File present to compare skipping similarity')
                 pass

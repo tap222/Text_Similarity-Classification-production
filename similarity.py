@@ -16,7 +16,7 @@ from polyfuzz import PolyFuzz
 # Functionality : calculate the sparse matrix for similarity calculation
 ###########################################################################################################################
 
-def awesome_cossim_top(A, B, ntop, lower_bound=0, pFromDir, pToDir):
+def awesome_cossim_top(A, B, ntop, pFromDir, pToDir, lower_bound=0):
     try:
         # force A and B as a CSR matrix.
         # If they have already been CSR, there is no overhead
