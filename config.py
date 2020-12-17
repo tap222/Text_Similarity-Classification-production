@@ -1,6 +1,6 @@
 import os
-pAccountName = 'model\\'+'Honeywell' #model Name 
-pTh = 0.0 # Thershold below intent is categorzied other
+pAccountName = 'model\\'+'pFizer' #model Name 
+pTh = 0.3 # Thershold below intent is categorzied other
 pDesc = 'Ticket_Description' # Ticket Description column name for training and testing
 pRootDir = 'C:\\Users\\tamohant\\Desktop\\Auto_synthesis_Training_data\\AutoSynthesisLite\\data' # Directory of the data file
 pLevel1 = 'Level1' # Column name of Level1
@@ -21,4 +21,5 @@ viz = False #Boolean whether to run the script of visualization
 nTopKeywrd = 10 #Top keywords to represent in weight calculation for an intent
 pTrainingDataDir = os.path.join(pRootDir  + '\\' + 'traindata' + '\\' + str(pAccountName[6:]))
 pThSim = 0.60
-pSheetName = None
+pSheetName = 'Notes'
+Nbest = 2 # Number next best parameter

@@ -89,6 +89,7 @@ pAccountName = config.pAccountName
 pTestFileName = config.pTestFileName
 pTrainingDataDir = config.pTrainingDataDir
 pTrainingFileName = config.pTrainingFileName
+Nbest = config.Nbest
 
 ###########################################################################################################################
 # Author        : Tapas Mohanty  
@@ -141,11 +142,11 @@ if __name__ == "__main__":
 
         print('*************************Testing Similarity Started***************************************')
         if config.sim:
-            pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir, pSheetName)
+            pTrainingFiles, pTrainingData = utils.Filelist(pTrainingDataDir, pSheetName = None)
             pDesc = config.pDesc
             if len(pTrainingFiles) > 0:
                 # __, pTestingData = similarity.similaritymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc)  
-                __, pTestingData = similarity.similaritypolymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc, pTestDir, pFailedDir)  
+                __, pTestingData = similarity.similaritypolymain(pTrainingData, pTestingData, pLevel1, pLevel2, pDesc, pTestDir, pFailedDir, Nbest)  
             else:
                 print('No Training File present to compare skipping similarity')
                 pass
