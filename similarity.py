@@ -129,28 +129,35 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir,
         model = PolyFuzz("TF-IDF")
         model.match(pTestDataDescList, pTrainDataDescUnq, nbest = int(Nbest))
         pMatchesDf = model.get_matches()
-        col = ["To"]
+        IntCol = ["To"]
         for i in range(int(Nbest)-1):
-            col.append("BestMatch" + "__" + str(i))
+            IntCol.append("BestMatch" + "__" + str(i))
+            pTestData['Intent' + '__' + str(i)] = 'NaN'
             
-        for i in range(len(col)):
-            for j in range(len(pTestData)):
-                if pMatchesDf[col[i]][j] != None:
-                    if pMatchesDf[col[i]] != "To":
-                        pTestData['Intent' + '__' + str(i)][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[col[i]][j], True , False)]['Intent'+ '__' + str(i)].values[0]
-                    else:
-                        pTestData['Intent'][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[col[i]][j], True , False)]['Intent'].values[0]                 
+        for i in range(len(IntCol)):
+            if pMatchesDf.columns[i] != "To":
+                for j in range(len(pTestData)):
+                    if pMatchesDf[IntCol[i]][j] != None:
+                        pTestData['Intent' + '__' + str(i)][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[IntCol[i]][j], True , False)]['Intent'].values[0]
+            else:
+                for j in range(len(pTestData)):
+                    if pMatchesDf[IntCol[i]][j] != None:
+                        pTestData['Intent'][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[IntCol[i]][j], True , False)]['Intent'].values[0]                 
                     
-        column = ['Similarity']
+        SimCol = ['Similarity']
         for k in range(int(Nbest) - 1):
-            column.append("Similarity" + "__" + str(k))
+            SimCol.append("Similarity" + "__" + str(k))
+            pTestData['Confidence_Level'+ '__' + str(k)] = 'NaN'
             
-        for l in range(len(col)):
-            for m in range(len(pTestData)):
-                if pMatchesDf[col[l]] != "Similarity":
-                    pTestData['Confidence_Level'+ '__' + str(l)][m] = pMatchesDf[col[l]][m]
-                else:
-                    pTestData['Confidence_Level'][m] = pMatchesDf[col[l]][m]
+        for l in range(len(SimCol)):
+            if pMatchesDf.columns[l] != "Similarity":
+                for m in range(len(pTestData)):
+                    if pMatchesDf[SimCol[l]][m] != None:
+                        pTestData['Confidence_Level'+ '__' + str(l)][m] = pMatchesDf[SimCol[l]][m]
+            else:
+                for m in range(len(pTestData)):
+                    if pMatchesDf[SimCol[l]][m] != None:
+                        pTestData['Confidence_Level'][m] = pMatchesDf[SimCol[l]][m]
             
     except Exception as e:
         print('*** ERROR[004]: Error in similarity poly main function: ', sys.exc_info()[0],str(e))
