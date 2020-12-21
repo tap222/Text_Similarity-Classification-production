@@ -138,7 +138,7 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir,
         SimCol = ['Similarity']
         for k in range(int(Nbest) - 1):
             SimCol.append("Similarity" + "__" + str(k))
-            pTestData['Confidence_Level'+ '__' + str(l-1)] = 'NaN'
+            pTestData['Confidence_Level'+ '__' + str(k)] = 'NaN'
             
         for i in range(len(IntCol)):
             col = str(IntCol[i])
@@ -157,7 +157,7 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir,
             if col != "Similarity":
                 for m in range(len(pTestData)):
                     if pMatchesDf[col][m] != None:
-                        pTestData['Confidence_Level'+ '__' + str(l-1)][m] = pMatchesDf[SimCol[l]][m]
+                        pTestData['Confidence_Level'+ '__' + int(l-1)][m] = pMatchesDf[SimCol[l]][m]
             else:
                 for m in range(len(pTestData)):
                     if pMatchesDf[SimCol[l]][m] != None:
