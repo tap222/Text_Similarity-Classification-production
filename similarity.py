@@ -84,7 +84,7 @@ def traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir):
 def similaritymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir, pToDir):
     try:
         pMatches, pTestData['Intent'], pTestData['Confidence_Level'] = [],'Nan','Nan'
-        pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2)
+        pTrainData, __ = traindata(pTrainData, pDesc, pLevel1, pLevel2, pFromDir, pToDir)
         pTrainDataDesc = pd.DataFrame(pTrainData[pDesc])
         pTrainDataDescUnq = pTrainDataDesc[pDesc].unique()
         vectorizer = TfidfVectorizer(min_df=1, analyzer='char_wb', lowercase=False)
@@ -129,31 +129,35 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir,
         model = PolyFuzz("TF-IDF")
         model.match(pTestDataDescList, pTrainDataDescUnq, nbest = int(Nbest))
         pMatchesDf = model.get_matches()
+      
         IntCol = ["To"]
         for i in range(int(Nbest)-1):
             IntCol.append("BestMatch" + "__" + str(i))
             pTestData['Intent' + '__' + str(i)] = 'NaN'
-            
-        for i in range(len(IntCol)):
-            if pMatchesDf.columns[i] != "To":
-                for j in range(len(pTestData)):
-                    if pMatchesDf[IntCol[i]][j] != None:
-                        pTestData['Intent' + '__' + str(i)][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[IntCol[i]][j], True , False)]['Intent'].values[0]
-            else:
-                for j in range(len(pTestData)):
-                    if pMatchesDf[IntCol[i]][j] != None:
-                        pTestData['Intent'][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[IntCol[i]][j], True , False)]['Intent'].values[0]                 
-                    
+
         SimCol = ['Similarity']
         for k in range(int(Nbest) - 1):
             SimCol.append("Similarity" + "__" + str(k))
-            pTestData['Confidence_Level'+ '__' + str(k)] = 'NaN'
+            pTestData['Confidence_Level'+ '__' + str(l-1)] = 'NaN'
+            
+        for i in range(len(IntCol)):
+            col = str(IntCol[i])
+            if col != "To":
+                for j in range(len(pTestData)):
+                    if pMatchesDf[col][j] != None:
+                        pTestData['Intent' + '__' + str(i-1)][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[col][j], True , False)]['Intent'].values[0]
+            else:
+                for j in range(len(pTestData)):
+                    if pMatchesDf[col][j] != None:
+                        pTestData['Intent'][j] = pTrainData[np.where(pTrainData[pDesc] == pMatchesDf[IntCol[i]][j], True , False)]['Intent'].values[0]                 
+                    
             
         for l in range(len(SimCol)):
-            if pMatchesDf.columns[l] != "Similarity":
+            col = str(SimCol[l])
+            if col != "Similarity":
                 for m in range(len(pTestData)):
-                    if pMatchesDf[SimCol[l]][m] != None:
-                        pTestData['Confidence_Level'+ '__' + str(l)][m] = pMatchesDf[SimCol[l]][m]
+                    if pMatchesDf[col][m] != None:
+                        pTestData['Confidence_Level'+ '__' + str(l-1)][m] = pMatchesDf[SimCol[l]][m]
             else:
                 for m in range(len(pTestData)):
                     if pMatchesDf[SimCol[l]][m] != None:
