@@ -129,14 +129,14 @@ def similaritypolymain(pTrainData, pTestData, pLevel1, pLevel2, pDesc, pFromDir,
         model = PolyFuzz("TF-IDF")
         model.match(pTestDataDescList, pTrainDataDescUnq, nbest = int(Nbest))
         pMatchesDf = model.get_matches()
-      
+
         IntCol = ["To"]
-        for i in range(int(Nbest)-1):
+        for i in range(1, int(Nbest)-1):
             IntCol.append("BestMatch" + "__" + str(i))
             pTestData['Intent' + '__' + str(i)] = 'NaN'
 
         SimCol = ['Similarity']
-        for k in range(int(Nbest) - 1):
+        for k in range(1, int(Nbest) - 1):
             SimCol.append("Similarity" + "__" + str(k))
             pTestData['Confidence_Level'+ '__' + str(k)] = 'NaN'
             

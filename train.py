@@ -8,7 +8,9 @@ import utils
 import traceback
 import re, string
 from scipy import sparse
+from scipy.sparse import hstack 
 import pandas as pd, numpy as np
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import  TfidfVectorizer
 
@@ -29,7 +31,30 @@ def traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir):
         print(traceback.format_exc())
         utils.movefile(pFromDir, pToDir)
         return(-1)
+        sys.exit(-1)
     return pData, pLabel
+    
+# ###########################################################################################################################
+# # Author      : Tapas Mohanty                                                                                        
+# # Functionality : Stacking tfidf features with other features
+# ###########################################################################################################################
+def concatfeatures(pData, features, pRootDir, pModelName, pFromDir, pToDir, pVec):
+    try:
+        encoder = OneHotEncoder(categories = "auto", handle_unknown ='ignore')
+        Train_encoded = encoder.fit_transform(pData[features])
+        x = hstack([pVec, Train_encoded]).tocsr()
+        if not os.path.exists(pRootDir + '\\' +  str(pModelName) +  '\\' + str(pModelName[6:]) + '_Ohe_encode'):
+            os.makedirs(pRootDir + '\\' +   str(pModelName) +  '\\' + str(pModelName[6:]) + '_Ohe_encode')
+        enc_loc = pRootDir + '\\' + str(pModelName)  + '\\' + str(pModelName[6:]) + '_Ohe_encode'  +'\\' + str(pModelName[6:])  +  ".ohe.pkl"
+        pickle.dump(encoder, open(enc_loc,'wb'))
+    
+    except Exception as e:
+        print('*** ERROR[001]: Error in Training: ', sys.exc_info()[0],str(e))
+        print(traceback.format_exc())
+        utils.movefile(pFromDir, pToDir)
+        return(-1)
+        sys.exit(-1)
+    return x    
 
 # ###########################################################################################################################
 # # Author      : Tapas Mohanty                                                                                        
@@ -52,7 +77,7 @@ def vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir):
     try:
         pData[pDesc].fillna("unknown", inplace=True)
         print('Started vector for Sample ')
-        vec = TfidfVectorizer(ngram_range=(1,5),
+        vec = TfidfVectorizer(ngram_range=(1,3),
                               stop_words="english",
                               analyzer='char',
                               tokenizer=tokenize,
@@ -75,15 +100,21 @@ def vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir):
         print("*** ERROR[002]: %s " % (e.strerror))
         utils.movefile(pFromDir, pToDir)
         return(-1)      
+        sys.exit(-1)
     return x,vec
     
 def tokenize(s): 
     re_tok = re.compile(f'([{string.punctuation}“”¨_«»®´·º½¾¿¡§£₤‘’])')
     return re_tok.sub(r' \1 ', s).split()  
     
-def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFromDir, pToDir):
+def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, pFromDir, pToDir, features, pFeature):
     try:
-        x,vec = vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir)
+        if pFeature:
+            x,vec = vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir)
+            x = concatfeatures(pData, features, pRootDir, pModelName, pFromDir, pToDir, pVec = vec)
+        else:
+            x,vec = vector_trans(pData, pDesc, pModelName, pRootDir, pFromDir, pToDir)
+			
         print('Number of Tickets for training :', len(pData)) 
         pTrainData, __ = traindata(pData, pDesc, pLevel1, pLevel2, pFromDir, pToDir)      
         pTrainData['Intent']= pTrainData['Intent'].astype('category')
@@ -99,10 +130,10 @@ def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, 
                 if not os.path.exists(pRootDir + '\\' +  str(pModelName) + '\\' + str(pModelName[6:]) + foldername):
                     os.makedirs(pRootDir + '\\' +   str(pModelName)+ '\\' + str(pModelName[6:]) + foldername)
                 if foldername == '_Model':
-                    model_loc = pRootDir + '\\' +  str(pModelName) + '\\' + str(pModelName[6:]) +  foldername + '\\' + str(name).replace('/','or') + ".model.pkl"
+                    model_loc = pRootDir + '\\' +  str(pModelName) + '\\' + str(pModelName[6:]) +  foldername + '\\' + str(name).replace('/','or').replace(':','or') + ".model.pkl"
                     pickle.dump(m, open(model_loc,'wb'))                
                 else:
-                    r_loc = pRootDir + '\\' +  str(pModelName) + '\\' + str(pModelName[6:]) +  foldername + '\\' + str(name).replace('/','or') + ".npz" 
+                    r_loc = pRootDir + '\\' +  str(pModelName) + '\\' + str(pModelName[6:]) +  foldername + '\\' + str(name).replace('/','or').replace(':','or') + ".npz" 
                     sparse.save_npz(r_loc, r)   
 
     except OSError as e:
@@ -111,4 +142,5 @@ def createModel(pData, pDesc, pLevel1, pLevel2, pModelName, pRootDir, nTickets, 
         print("*** ERROR[003] : %s" % (e.strerror))
         utils.movefile(pFromDir, pToDir)
         return(-1)  
+        sys.exit(-1)
     return(0)   

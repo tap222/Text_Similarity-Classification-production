@@ -410,23 +410,24 @@ def normalize_corpus(corpus, html_stripping= True, contraction_expansion= True,
 # Functionality : Run the functions                                                          
 ###########################################################################################################################
 
-def preprocess(pData, pTktDesc, pFromDir, pToDir):  
+def preprocess(pData, pTktDesc, pTrainDir, pFailedDir, ewords):  
     try:
         pData = pData.applymap(str)
         # pData = col_keyword(pData, pTktDesc, pCol)
         # pData = pData.dropna(subset = ['Sample'])  
         pData = pData.dropna(subset = [pTktDesc])  
         norm_corpus = normalize_corpus(corpus=pData[pTktDesc], html_stripping=True, contraction_expansion=True, 
-                                      accented_char_removal=True, text_lower_case=True, text_lemmatization=True, 
+                                      accented_char_removal=True, text_lower_case=True, text_lemmatization=False, 
                                       text_stemming=False, special_char_removal=True, remove_digits=True,
-                                      custm_stpwrds= True,stopword_removal=True, ewords = True, stopwords=stopword_list,
+                                      custm_stpwrds= False,stopword_removal=True, ewords = ewords, stopwords=stopword_list,
                                       eng_words = engwords)
     except Exception as e:
         raise(e)
-        utils.movefile(pFromDir, pToDir)
+        utils.movefile(pTrainDir, pFailedDir)
         print(traceback.format_exc())
         print('Error ocurred due to template',e)
         return(-1)                            
+    
     pData['Sample'] = norm_corpus
     return (0,pData)   
     
